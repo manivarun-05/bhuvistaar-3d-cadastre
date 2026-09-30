@@ -47,3 +47,13 @@ htmlcov/
 *.db
 backups/
 *.backup
+
+# Frontend dependencies & build artifacts
+node_modules/
+frontend/node_modules/
+frontend/dist/
+dist/
+.vite/
+frontend/.vite/
+*.local
+

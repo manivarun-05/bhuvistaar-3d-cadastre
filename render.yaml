@@ -1,0 +1,79 @@
+# ==============================================================================
+# BhuVistaar — 3D Cadastral Intelligence & Validation Platform
+# Render Blueprint Specification (render.yaml)
+# Docs: https://render.com/docs/blueprint-spec
+# ==============================================================================
+
+services:
+  # ----------------------------------------------------------------------------
+  # 1. Backend Web Service (FastAPI / Uvicorn / Python 3.12)
+  # ----------------------------------------------------------------------------
+  - type: web
+    name: bhuvistaar-backend
+    runtime: python
+    region: oregon # Available: oregon, frankfurt, ohio, singapore
+    plan: free # Change to starter/standard for sustained production
+    branch: main
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT --workers 1
+    healthCheckPath: /health/live
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: APP_ENV
+        value: production
+      - key: DEMO_MODE
+        value: "true"
+      - key: AI_MODE
+        value: LOCAL
+      - key: AI_ASSISTANCE_ENABLED
+        value: "true"
+      - key: AUTHORIZATION_MODE
+        value: SIMULATED_PROTOTYPE
+      - key: CORS_ORIGINS
+        value: "https://bhuvistaar-frontend.onrender.com"
+      - key: LOG_LEVEL
+        value: INFO
+      # Database: If using Render Postgres, uncomment the fromDatabase block below.
+      # When DATABASE_URL is not set, BhuVistaar automatically boots its built-in
+      # SQLite PostGIS spatial emulation engine with zero manual configuration.
+      # - key: DATABASE_URL
+      #   fromDatabase:
+      #     name: bhuvistaar-db
+      #     property: connectionString
+
+  # ----------------------------------------------------------------------------
+  # 2. Frontend Static Site (React 19 / Vite / TypeScript / Three.js)
+  # ----------------------------------------------------------------------------
+  - type: web
+    name: bhuvistaar-frontend
+    runtime: static
+    region: oregon
+    plan: free
+    branch: main
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    autoDeploy: true
+    routes:
+      # Single-page application fallback for client-side routing
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_BASE_URL
+        sync: false
+        # When creating the blueprint, set this to your backend service URL:
+        # e.g., https://bhuvistaar-backend.onrender.com
+
+# ------------------------------------------------------------------------------
+# 3. Optional Managed PostgreSQL Database (Requires Render Starter plan for PostGIS)
+# Uncomment this section if you wish to deploy Render Managed PostgreSQL:
+# ------------------------------------------------------------------------------
+# databases:
+#   - name: bhuvistaar-db
+#     databaseName: bhuvistaar_cadastre
+#     user: postgres
+#     plan: starter # Starter plan allows PostGIS extension: CREATE EXTENSION postgis;
+#     region: oregon

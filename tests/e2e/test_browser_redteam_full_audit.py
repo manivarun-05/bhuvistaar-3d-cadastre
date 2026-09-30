@@ -17,8 +17,15 @@ import time
 import socket
 import subprocess
 import pytest
-import httpx
-from playwright.sync_api import sync_playwright
+try:
+    from playwright.sync_api import sync_playwright
+    HAS_PLAYWRIGHT = True
+except ImportError:
+    HAS_PLAYWRIGHT = False
+    sync_playwright = None
+
+pytestmark = pytest.mark.skipif(not HAS_PLAYWRIGHT, reason="playwright is not installed")
+
 
 BACKEND_PORT = 8002
 FRONTEND_PORT = 5175

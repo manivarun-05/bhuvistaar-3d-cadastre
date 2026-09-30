@@ -4,7 +4,23 @@ from fastapi.testclient import TestClient
 from sqlalchemy import text
 from backend.main import app
 from backend.db.session import SessionLocal, Base, engine
+import socket
 from backend.db.models import ParentParcelModel, SpatialUnitModel, EvidenceSourceModel, ValidationIssueModel
+
+
+def _is_postgis_online():
+    try:
+        with socket.create_connection(("127.0.0.1", 5432), timeout=0.2):
+            return True
+    except OSError:
+        return False
+
+
+pytestmark = pytest.mark.skipif(
+    not _is_postgis_online(),
+    reason="Real PostgreSQL/PostGIS database is not accessible on localhost:5432"
+)
+
 
 
 @pytest.fixture(scope="module")

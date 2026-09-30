@@ -25,7 +25,11 @@ class Settings(BaseSettings):
     AUTH_MODE: str = Field(default="SIMULATED_PROTOTYPE", description="Alias for AUTHORIZATION_MODE")
 
     # Operational Deployment & Environment Configuration (Slice 5)
-    APP_ENV: str = Field(default="demo", description="Runtime environment: demo, development, test, production_simulation")
+    PORT: int = Field(default=8000, description="Web service listening port (injected by Render via $PORT)")
+    HOST: str = Field(default="0.0.0.0", description="Web service listening host")
+    CORS_ORIGINS: str = Field(default="", description="Comma-separated allowed CORS origins")
+    APP_ENV: str = Field(default="demo", description="Runtime environment: demo, development, test, production")
+
     API_BASE_URL: str = Field(default="http://127.0.0.1:8000", description="Backend API base URL")
     FRONTEND_BASE_URL: str = Field(default="http://127.0.0.1:5173", description="Frontend base URL")
     DEMO_MODE: bool = Field(default=True, description="Enable synthetic judge demo scenarios")

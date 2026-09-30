@@ -1,5 +1,6 @@
 import uuid
 import logging
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,16 +13,49 @@ from backend.schemas.common import ErrorEnvelope, ErrorDetail
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("bhuvistaar")
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Ensure database schema and baseline demo fixture are initialized at startup
+    try:
+        from backend.db.session import init_db_if_needed
+        init_db_if_needed()
+    except Exception as e:
+        logger.warning(f"Error during startup init_db_if_needed: {e}")
+    yield
+
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version="0.1.0",
-    description="Machine-assisted 3D Cadastral Intelligence & Validation Platform (Prototype)"
+    description="Machine-assisted 3D Cadastral Intelligence & Validation Platform (Prototype)",
+    lifespan=lifespan
 )
 
-# CORS middleware
+# Parse CORS origins
+cors_origins = [
+    origin.strip()
+    for origin in settings.CORS_ORIGINS.split(",")
+    if origin.strip()
+]
+default_local_origins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:8000",
+]
+for origin in default_local_origins:
+    if origin not in cors_origins:
+        cors_origins.append(origin)
+
+if settings.FRONTEND_BASE_URL and settings.FRONTEND_BASE_URL not in cors_origins:
+    cors_origins.append(settings.FRONTEND_BASE_URL)
+
+# CORS middleware supporting Render domains and configured origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=cors_origins,
+    allow_origin_regex=r"^https://.*\.onrender\.com$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

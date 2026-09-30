@@ -20,12 +20,11 @@ POSTGIS_TEST_URL = "postgresql+psycopg://postgres:postgrespassword@127.0.0.1:543
 
 
 def is_postgis_online():
+    import socket
     try:
-        engine = create_engine(POSTGIS_TEST_URL, pool_pre_ping=True)
-        with engine.connect() as conn:
-            res = conn.execute(text("SELECT 1;")).scalar()
-            return res == 1
-    except Exception:
+        with socket.create_connection(("127.0.0.1", 5432), timeout=0.2):
+            return True
+    except OSError:
         return False
 
 

@@ -27,7 +27,23 @@ from backend.schemas.governance_contracts import (
 from backend.domain.enums import ReviewDecisionType, UnitStatus, AuditAction
 from backend.exceptions import ApprovalBlockedError, RevisionNotFoundError
 
+import socket
+
 POSTGIS_URL = "postgresql+psycopg://postgres:postgrespassword@127.0.0.1:5432/bhuvistaar_cadastre"
+
+
+def _is_postgis_online():
+    try:
+        with socket.create_connection(("127.0.0.1", 5432), timeout=0.2):
+            return True
+    except OSError:
+        return False
+
+
+pytestmark = pytest.mark.skipif(
+    not _is_postgis_online(),
+    reason="Real PostgreSQL/PostGIS database is not accessible on localhost:5432"
+)
 
 
 @pytest.fixture(scope="module")

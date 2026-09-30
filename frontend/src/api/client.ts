@@ -10,7 +10,12 @@ import {
   StructuredExport,
 } from '../types';
 
-const API_BASE = '/api/v1';
+let rawBase = (import.meta.env.VITE_API_BASE_URL || '').trim().replace(/\/+$/, '');
+if (rawBase && !rawBase.startsWith('http://') && !rawBase.startsWith('https://') && !rawBase.startsWith('/')) {
+  rawBase = `https://${rawBase}`;
+}
+const RAW_BASE = rawBase;
+const API_BASE = `${RAW_BASE}/api/v1`;
 
 export class ApiError extends Error {
   statusCode: number;
@@ -329,7 +334,7 @@ export const api = {
   // ==============================================================================
 
   async getHealth(): Promise<any> {
-    const res = await fetch('/health');
+    const res = await fetch(`${RAW_BASE}/health`);
     return handleResponse<any>(res);
   },
 
