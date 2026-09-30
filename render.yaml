@@ -46,12 +46,13 @@ services:
   # ----------------------------------------------------------------------------
   # 2. Frontend Static Site (React 19 / Vite / TypeScript / Three.js)
   # ----------------------------------------------------------------------------
-  - type: static
+  - type: web
     name: bhuvistaar-frontend
+    runtime: static
     branch: main
     rootDir: frontend
     buildCommand: npm install && npm run build
-    publishPath: dist
+    staticPublishPath: dist
     autoDeploy: true
     routes:
       # Single-page application fallback for client-side routing
@@ -60,9 +61,7 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_BASE_URL
-        sync: false
-        # When creating the blueprint, set this to your backend service URL:
-        # e.g., https://bhuvistaar-backend.onrender.com
+        value: "https://bhuvistaar-backend.onrender.com"
 
 # ------------------------------------------------------------------------------
 # 3. Optional Managed PostgreSQL Database (Requires Render Starter plan for PostGIS)
