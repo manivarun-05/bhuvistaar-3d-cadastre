@@ -46,15 +46,12 @@ services:
   # ----------------------------------------------------------------------------
   # 2. Frontend Static Site (React 19 / Vite / TypeScript / Three.js)
   # ----------------------------------------------------------------------------
-  - type: web
+  - type: static
     name: bhuvistaar-frontend
-    runtime: static
-    region: oregon
-    plan: free
     branch: main
     rootDir: frontend
     buildCommand: npm install && npm run build
-    staticPublishPath: dist
+    publishPath: dist
     autoDeploy: true
     routes:
       # Single-page application fallback for client-side routing
